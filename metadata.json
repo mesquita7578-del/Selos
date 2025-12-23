@@ -1,0 +1,7 @@
+{
+  "name": "PhilaArchive Neon",
+  "description": "A high-performance personal archive for stamps, postcards, and FDC envelopes with a stunning neon blue aesthetic. Manage up to 10,000 items with metadata for country, date, value, theme, and condition.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
