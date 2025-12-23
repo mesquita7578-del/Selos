@@ -94,6 +94,17 @@ const App: React.FC = () => {
     }
   }, [items]);
 
+  const handleOpenNewForm = useCallback(() => {
+    setEditingItem(null);
+    setIsFormOpen(true);
+  }, []);
+
+  const handleOpenScanForm = useCallback(() => {
+    setEditingItem(null);
+    setIsFormOpen(true);
+    // Poderia haver uma lógica extra aqui para focar no upload, mas o ItemForm já faz isso
+  }, []);
+
   const handleSaveItem = (item: PhilatelyItem) => {
     setItems(prev => {
       const exists = prev.some(i => i.id === item.id);
@@ -156,7 +167,7 @@ const App: React.FC = () => {
   const hasMore = visibleCount < sortedAndFilteredItems.length;
 
   return (
-    <Layout>
+    <Layout onNewClick={handleOpenNewForm} onScanClick={handleOpenScanForm}>
       <div className="space-y-12 animate-in fade-in duration-700">
         <section id="dashboard" className="scroll-mt-24">
           <h2 className="text-3xl font-bold text-white mb-2">Olá, Colecionador</h2>
@@ -188,7 +199,7 @@ const App: React.FC = () => {
           
           <div className="flex flex-col gap-4">
             <button 
-              onClick={() => { setEditingItem(null); setIsFormOpen(true); }}
+              onClick={handleOpenNewForm}
               className="flex-1 group relative bg-cyan-600/5 border-2 border-dashed border-cyan-500/30 rounded-2xl p-6 flex flex-col items-center justify-center gap-4 transition-all hover:bg-cyan-600/15 hover:border-cyan-400 hover:shadow-[0_0_35px_rgba(34,211,238,0.15)]"
             >
               <div className="w-14 h-14 bg-cyan-500 rounded-2xl flex items-center justify-center text-slate-950 neon-glow transition-all group-hover:scale-110 group-hover:rotate-6 shadow-xl">
@@ -203,8 +214,8 @@ const App: React.FC = () => {
             </button>
 
             <button 
-              onClick={() => { setEditingItem(null); setIsFormOpen(true); }}
-              className="group bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 flex items-center justify-between hover:border-cyan-500/50 transition-all"
+              onClick={handleOpenScanForm}
+              className="group bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 flex items-center justify-between hover:border-cyan-500/50 transition-all shadow-lg active:scale-[0.98]"
             >
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 bg-cyan-500/10 rounded-lg flex items-center justify-center text-cyan-500 border border-cyan-500/20">
