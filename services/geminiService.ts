@@ -1,6 +1,6 @@
 
-import { GoogleGenAI } from "@google/genai";
-import { PhilatelyItem } from "../types";
+import { GoogleGenAI, Type } from "@google/genai";
+import { PhilatelyItem, Continent, ItemType, ItemCondition } from "../types";
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || "" });
 
@@ -25,6 +25,57 @@ export const getSmartDescription = async (item: Partial<PhilatelyItem>): Promise
   } catch (error) {
     console.error("Error generating smart description:", error);
     return "Erro ao gerar descrição inteligente.";
+  }
+};
+
+export const analyzeImageForMetadata = async (base64Image: string): Promise<Partial<PhilatelyItem> | null> => {
+  try {
+    const imagePart = {
+      inlineData: {
+        mimeType: 'image/jpeg',
+        data: base64Image.split(',')[1],
+      },
+    };
+
+    const prompt = `Analise esta imagem de um item filatélico (selo, postal ou envelope FDC).
+    Extraia as seguintes informações se visíveis:
+    - País (Country)
+    - Continente (Escolha um: Europe, Americas, Asia, Africa, Oceania)
+    - Ano/Data (Year)
+    - Valor facial (Face Value)
+    - Tema (Ex: Natureza, História, etc.)
+    - Tipo (Escolha um: Selo, Postal, Envelope FDC)
+    - Condição sugerida (Escolha um: MINT, Novo, Usado, FDC)
+    - Notas (Breve descrição técnica)
+
+    Retorne APENAS um objeto JSON.`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-3-flash-preview",
+      contents: { parts: [imagePart, { text: prompt }] },
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            country: { type: Type.STRING },
+            continent: { type: Type.STRING },
+            date: { type: Type.STRING },
+            value: { type: Type.STRING },
+            theme: { type: Type.STRING },
+            type: { type: Type.STRING },
+            condition: { type: Type.STRING },
+            notes: { type: Type.STRING },
+          },
+          required: ["country", "type"]
+        },
+      },
+    });
+
+    return JSON.parse(response.text || "{}");
+  } catch (error) {
+    console.error("Error analyzing image:", error);
+    return null;
   }
 };
 

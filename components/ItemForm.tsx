@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Continent, ItemCondition, ItemType, PhilatelyItem } from '../types';
 import { CONTINENTS, THEMES } from '../constants';
-import { getSmartDescription, searchPhilatelicInfo } from '../services/geminiService';
+import { getSmartDescription, searchPhilatelicInfo, analyzeImageForMetadata } from '../services/geminiService';
 
 interface ItemFormProps {
   onSave: (item: PhilatelyItem) => void;
@@ -13,6 +13,7 @@ interface ItemFormProps {
 const ItemForm: React.FC<ItemFormProps> = ({ onSave, onCancel, initialData }) => {
   const [loadingAI, setLoadingAI] = useState(false);
   const [searchingAI, setSearchingAI] = useState(false);
+  const [analyzingImage, setAnalyzingImage] = useState(false);
   const [searchResultText, setSearchResultText] = useState<string>('');
   const [searchSources, setSearchSources] = useState<any[]>([]);
   const fileInputFront = useRef<HTMLInputElement>(null);
@@ -62,16 +63,36 @@ const ItemForm: React.FC<ItemFormProps> = ({ onSave, onCancel, initialData }) =>
     setLoadingAI(false);
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, side: 'front' | 'back') => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, side: 'front' | 'back') => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => {
+      reader.onloadend = async () => {
         const base64String = reader.result as string;
         setFormData(prev => ({
           ...prev,
           [side === 'front' ? 'imageFront' : 'imageBack']: base64String
         }));
+
+        // Trigger AI analysis if it's the front image and not editing existing item
+        if (side === 'front' && !initialData) {
+          setAnalyzingImage(true);
+          const metadata = await analyzeImageForMetadata(base64String);
+          if (metadata) {
+            setFormData(prev => ({
+              ...prev,
+              country: metadata.country || prev.country,
+              continent: (metadata.continent as Continent) || prev.continent,
+              date: metadata.date || prev.date,
+              value: metadata.value || prev.value,
+              theme: metadata.theme || prev.theme,
+              type: (metadata.type as ItemType) || prev.type,
+              condition: (metadata.condition as ItemCondition) || prev.condition,
+              notes: metadata.notes ? (prev.notes ? prev.notes + "\n\n" : "") + metadata.notes : prev.notes,
+            }));
+          }
+          setAnalyzingImage(false);
+        }
       };
       reader.readAsDataURL(file);
     }
@@ -96,7 +117,15 @@ const ItemForm: React.FC<ItemFormProps> = ({ onSave, onCancel, initialData }) =>
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-sm">
       <div className="bg-slate-900 w-full max-w-2xl rounded-2xl border border-cyan-900/50 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
         <div className="p-6 border-b border-slate-800 flex justify-between items-center">
-          <h2 className="text-xl font-bold neon-text">{initialData ? 'Editar Item' : 'Registrar Novo Item'}</h2>
+          <div className="flex items-center gap-3">
+            <h2 className="text-xl font-bold neon-text">{initialData ? 'Editar Item' : 'Registrar Novo Item'}</h2>
+            {analyzingImage && (
+              <span className="flex items-center gap-2 text-[10px] text-cyan-400 font-bold uppercase animate-pulse">
+                <div className="w-2 h-2 bg-cyan-400 rounded-full animate-ping"></div>
+                IA Analisando Imagem...
+              </span>
+            )}
+          </div>
           <button onClick={onCancel} className="text-slate-400 hover:text-white text-2xl leading-none">&times;</button>
         </div>
         
@@ -219,7 +248,7 @@ const ItemForm: React.FC<ItemFormProps> = ({ onSave, onCancel, initialData }) =>
           {(searchResultText || searchSources.length > 0) && (
             <div className="p-4 bg-cyan-950/20 border border-cyan-900/30 rounded-xl space-y-3">
               <h4 className="text-xs font-bold text-cyan-400 uppercase tracking-widest flex items-center gap-2">
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span className="bg-cyan-500 text-slate-950 px-1.5 py-0.5 rounded text-[8px] font-black">IA</span>
                 Informações Adicionais
               </h4>
               
@@ -240,7 +269,7 @@ const ItemForm: React.FC<ItemFormProps> = ({ onSave, onCancel, initialData }) =>
                           href={chunk.web.uri} 
                           target="_blank" 
                           rel="noopener noreferrer"
-                          className="text-[10px] bg-slate-900 px-2 py-1 rounded border border-slate-800 text-cyan-400 hover:border-cyan-500 transition-all truncate max-w-[140px]"
+                          className="text-[10px] bg-slate-900 px-2 py-1 rounded border border-slate-800 text-cyan-400 hover:border-cyan-500 hover:text-cyan-200 hover:shadow-[0_0_10px_rgba(34,211,238,0.4)] transition-all truncate max-w-[140px]"
                         >
                           {chunk.web.title || chunk.web.uri}
                         </a>
