@@ -9,6 +9,7 @@ interface LayoutProps {
   onImportJson?: () => void;
   onInstallApp?: () => void;
   onStatsClick?: () => void;
+  onShareClick?: () => void;
   showInstallBtn?: boolean;
   continentsData?: Record<string, number>;
   selectedContinent?: string | null;
@@ -23,6 +24,7 @@ const Layout: React.FC<LayoutProps> = ({
   onImportJson,
   onInstallApp,
   onStatsClick,
+  onShareClick,
   showInstallBtn = false,
   continentsData = {},
   selectedContinent = null,
@@ -48,7 +50,7 @@ const Layout: React.FC<LayoutProps> = ({
           </div>
           <div className="flex flex-col">
             <h1 className="text-lg font-bold tracking-tight neon-text leading-none">PhilaArchive <span className="text-slate-400 font-light">Neon</span></h1>
-            <span className="text-[8px] text-cyan-500/50 uppercase tracking-[0.4em] font-black">Curadoria Digital</span>
+            <span className="text-[8px] text-cyan-500/50 uppercase tracking-[0.4em] font-black">Arquivo Privado</span>
           </div>
         </div>
 
@@ -58,9 +60,19 @@ const Layout: React.FC<LayoutProps> = ({
             <button 
               onClick={onStatsClick}
               className="px-4 py-1.5 text-[10px] font-black uppercase tracking-tighter text-cyan-400 hover:bg-cyan-500/10 rounded-full transition-all flex items-center gap-2"
+              title="Ver Estatísticas"
             >
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
-              ESTATÍSTICAS
+              STATS
+            </button>
+            <div className="w-px h-4 bg-slate-800 mx-1"></div>
+            <button 
+              onClick={onShareClick}
+              className="px-4 py-1.5 text-[10px] font-black uppercase tracking-tighter text-emerald-400 hover:bg-emerald-500/10 rounded-full transition-all flex items-center gap-2"
+              title="Convidar colecionadores"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
+              CONVIDAR
             </button>
             <div className="w-px h-4 bg-slate-800 mx-1"></div>
             <button 
@@ -128,7 +140,7 @@ const Layout: React.FC<LayoutProps> = ({
              </div>
              <div className="w-px h-4 bg-slate-800"></div>
              <div className="flex items-center gap-2">
-                <span>V.3.1 LIVE</span>
+                <span>V.3.2 LIVE</span>
              </div>
           </div>
         </div>
@@ -139,12 +151,17 @@ const Layout: React.FC<LayoutProps> = ({
       </main>
 
       <footer className="border-t border-slate-900 py-10 bg-slate-950">
-        <div className="max-w-[1600px] mx-auto px-8 flex flex-col md:flex-row justify-between items-center gap-6">
+        <div className="max-w-[1600px] mx-auto px-8 flex flex-col md:flex-row justify-between items-center gap-10">
           <div className="flex flex-col gap-1">
             <div className="text-slate-400 text-[11px] font-black uppercase tracking-[0.3em]">PhilaArchive Neon</div>
-            <div className="text-slate-600 text-[9px] font-medium uppercase tracking-widest">Sistema de Gestão e Análise de Filatelia Digital</div>
+            <div className="text-slate-600 text-[9px] font-medium uppercase tracking-widest">Digital Philately • Personal Sandbox</div>
           </div>
-          <div className="flex gap-10">
+          <div className="flex-1 text-center bg-slate-900/30 p-4 rounded-2xl border border-slate-800 max-w-lg">
+             <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-relaxed">
+               🛡️ Cada utilizador tem o seu arquivo privado. Os dados registados aqui pertencem apenas a si e ficam guardados no seu navegador.
+             </p>
+          </div>
+          <div className="flex gap-8">
             {['Termos', 'Privacidade', 'API', 'Suporte'].map(link => (
               <a key={link} href="#" className="text-slate-600 hover:text-cyan-500 text-[10px] font-black uppercase tracking-widest transition-colors">{link}</a>
             ))}
