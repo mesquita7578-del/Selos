@@ -79,6 +79,60 @@ export const analyzeImageForMetadata = async (base64Image: string): Promise<Part
   }
 };
 
+export interface VisualDetectionResult {
+  elements: { label: string; x: number; y: number; description: string }[];
+  suggestedTheme: string | null;
+}
+
+export const detectVisualElements = async (base64Image: string): Promise<VisualDetectionResult> => {
+  try {
+    const imagePart = {
+      inlineData: {
+        mimeType: 'image/jpeg',
+        data: base64Image.split(',')[1],
+      },
+    };
+
+    const prompt = `Analise esta imagem filatélica e localize visualmente os elementos-chave (País, Ano, Valor Facial, Tema Principal, Símbolos Relevantes).
+    Para cada elemento encontrado, forneça uma coordenada X e Y (de 0 a 100, onde 0,0 é o topo-esquerdo) e uma breve descrição do que foi detectado.
+    Além disso, com base em todos os elementos visuais, sugira uma classificação de Tema (Theme) mais precisa para este item (ex: "Realeza", "Flora", "Arquitetura Barroca").
+    Retorne apenas um objeto JSON com 'elements' (lista) e 'suggestedTheme' (string).`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-3-flash-preview",
+      contents: { parts: [imagePart, { text: prompt }] },
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            elements: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  label: { type: Type.STRING },
+                  x: { type: Type.NUMBER },
+                  y: { type: Type.NUMBER },
+                  description: { type: Type.STRING }
+                },
+                required: ["label", "x", "y", "description"]
+              }
+            },
+            suggestedTheme: { type: Type.STRING, nullable: true }
+          },
+          required: ["elements", "suggestedTheme"]
+        },
+      },
+    });
+
+    return JSON.parse(response.text || '{"elements":[], "suggestedTheme": null}');
+  } catch (error) {
+    console.error("Error detecting visual elements:", error);
+    return { elements: [], suggestedTheme: null };
+  }
+};
+
 export const searchPhilatelicInfo = async (query: string): Promise<{ text: string; sources: any[] }> => {
   try {
     const response = await ai.models.generateContent({

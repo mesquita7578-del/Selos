@@ -268,6 +268,7 @@ const App: React.FC = () => {
                 item={item} 
                 onDelete={handleDeleteItem} 
                 onEdit={handleEditItem}
+                onUpdate={handleSaveItem}
               />
             ))}
             
