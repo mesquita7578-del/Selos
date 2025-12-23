@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Continent, ItemCondition, ItemType, PhilatelyItem } from '../types';
 import { CONTINENTS, THEMES } from '../constants';
-import { getSmartDescription } from '../services/geminiService';
+import { getSmartDescription, searchPhilatelicInfo } from '../services/geminiService';
 
 interface ItemFormProps {
   onSave: (item: PhilatelyItem) => void;
@@ -12,6 +12,9 @@ interface ItemFormProps {
 
 const ItemForm: React.FC<ItemFormProps> = ({ onSave, onCancel, initialData }) => {
   const [loadingAI, setLoadingAI] = useState(false);
+  const [searchingAI, setSearchingAI] = useState(false);
+  const [searchResultText, setSearchResultText] = useState<string>('');
+  const [searchSources, setSearchSources] = useState<any[]>([]);
   const fileInputFront = useRef<HTMLInputElement>(null);
   const fileInputBack = useRef<HTMLInputElement>(null);
 
@@ -33,6 +36,20 @@ const ItemForm: React.FC<ItemFormProps> = ({ onSave, onCancel, initialData }) =>
       setFormData(initialData);
     }
   }, [initialData]);
+
+  const handleAutoSearch = async () => {
+    if (!formData.country) {
+      alert("Digite pelo menos o país para pesquisar!");
+      return;
+    }
+    setSearchingAI(true);
+    const query = `${formData.type} ${formData.country} ${formData.date} ${formData.theme}`;
+    const result = await searchPhilatelicInfo(query);
+    
+    setSearchResultText(result.text);
+    setSearchSources(result.sources);
+    setSearchingAI(false);
+  };
 
   const handleAIHelp = async () => {
     if (!formData.country || !formData.date) {
@@ -110,14 +127,29 @@ const ItemForm: React.FC<ItemFormProps> = ({ onSave, onCancel, initialData }) =>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">País</label>
-              <input 
-                type="text" 
-                className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 focus:border-cyan-500 outline-none text-sm"
-                placeholder="Ex: Portugal"
-                value={formData.country}
-                onChange={e => setFormData({...formData, country: e.target.value})}
-                required
-              />
+              <div className="flex gap-2">
+                <input 
+                  type="text" 
+                  className="flex-1 bg-slate-950 border border-slate-800 rounded-lg p-2 focus:border-cyan-500 outline-none text-sm"
+                  placeholder="Ex: Portugal"
+                  value={formData.country}
+                  onChange={e => setFormData({...formData, country: e.target.value})}
+                  required
+                />
+                <button 
+                  type="button"
+                  onClick={handleAutoSearch}
+                  disabled={searchingAI}
+                  className="px-3 bg-cyan-900/30 text-cyan-400 border border-cyan-900/50 rounded-lg hover:bg-cyan-900/50 transition-colors disabled:opacity-50"
+                  title="Pesquisar informações filatéticas"
+                >
+                  {searchingAI ? (
+                    <div className="w-4 h-4 border-2 border-cyan-400/30 border-t-cyan-400 rounded-full animate-spin"></div>
+                  ) : (
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                  )}
+                </button>
+              </div>
             </div>
             <div>
               <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">Data (Ano)</label>
@@ -183,6 +215,42 @@ const ItemForm: React.FC<ItemFormProps> = ({ onSave, onCancel, initialData }) =>
               onChange={e => setFormData({...formData, notes: e.target.value})}
             />
           </div>
+
+          {(searchResultText || searchSources.length > 0) && (
+            <div className="p-4 bg-cyan-950/20 border border-cyan-900/30 rounded-xl space-y-3">
+              <h4 className="text-xs font-bold text-cyan-400 uppercase tracking-widest flex items-center gap-2">
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                Informações Adicionais
+              </h4>
+              
+              {searchResultText && (
+                <p className="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap">
+                  {searchResultText}
+                </p>
+              )}
+
+              {searchSources.length > 0 && (
+                <div className="pt-2 border-t border-cyan-900/30">
+                  <span className="text-[10px] text-slate-500 font-bold uppercase mb-2 block">Fontes Encontradas:</span>
+                  <div className="flex flex-wrap gap-2">
+                    {searchSources.map((chunk, idx) => (
+                      chunk.web && (
+                        <a 
+                          key={idx} 
+                          href={chunk.web.uri} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-[10px] bg-slate-900 px-2 py-1 rounded border border-slate-800 text-cyan-400 hover:border-cyan-500 transition-all truncate max-w-[140px]"
+                        >
+                          {chunk.web.title || chunk.web.uri}
+                        </a>
+                      )
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="grid grid-cols-2 gap-4">
             <div 

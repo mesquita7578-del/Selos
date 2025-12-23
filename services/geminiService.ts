@@ -28,6 +28,29 @@ export const getSmartDescription = async (item: Partial<PhilatelyItem>): Promise
   }
 };
 
+export const searchPhilatelicInfo = async (query: string): Promise<{ text: string; sources: any[] }> => {
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-3-flash-preview",
+      contents: `Pesquise detalhes técnicos e históricos sobre este item filatélico: "${query}". 
+      Retorne informações como: Ano exato, Tema principal, raridade e curiosidades. 
+      Responda em Português de forma estruturada.`,
+      config: {
+        tools: [{ googleSearch: {} }],
+      },
+    });
+
+    const sources = response.candidates?.[0]?.groundingMetadata?.groundingChunks || [];
+    return {
+      text: response.text || "Nenhuma informação detalhada encontrada.",
+      sources: sources
+    };
+  } catch (error) {
+    console.error("Error searching philatelic info:", error);
+    return { text: "Erro ao realizar busca automática.", sources: [] };
+  }
+};
+
 export const analyzeCollection = async (items: PhilatelyItem[]): Promise<string> => {
   try {
     const summary = items.slice(0, 50).map(i => `${i.type} (${i.country}, ${i.date})`).join(", ");
