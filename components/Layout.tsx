@@ -5,9 +5,11 @@ interface LayoutProps {
   children: React.ReactNode;
   onNewClick?: () => void;
   onScanClick?: () => void;
+  onExportJson?: () => void;
+  onImportJson?: () => void;
 }
 
-const Layout: React.FC<LayoutProps> = ({ children, onNewClick, onScanClick }) => {
+const Layout: React.FC<LayoutProps> = ({ children, onNewClick, onScanClick, onExportJson, onImportJson }) => {
   const scrollTo = (id: string) => {
     const el = document.getElementById(id);
     if (el) {
@@ -31,31 +33,39 @@ const Layout: React.FC<LayoutProps> = ({ children, onNewClick, onScanClick }) =>
         </div>
 
         <nav className="hidden xl:flex items-center bg-slate-900/50 border border-slate-800 rounded-full px-6 py-1.5 space-x-8">
-          <button 
-            onClick={() => scrollTo('dashboard')} 
-            className="text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-cyan-400 transition-all flex items-center gap-2 group"
-          >
+          <button onClick={() => scrollTo('dashboard')} className="text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-cyan-400 transition-all flex items-center gap-2 group">
             <div className="w-1 h-1 bg-cyan-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
             Dashboard
           </button>
-          <button 
-            onClick={() => scrollTo('stats')} 
-            className="text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-cyan-400 transition-all flex items-center gap-2 group"
-          >
+          <button onClick={() => scrollTo('stats')} className="text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-cyan-400 transition-all flex items-center gap-2 group">
             <div className="w-1 h-1 bg-cyan-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
             Estatísticas
           </button>
-          <button 
-            onClick={() => scrollTo('collection')} 
-            className="text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-cyan-400 transition-all flex items-center gap-2 group"
-          >
+          <button onClick={() => scrollTo('collection')} className="text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-cyan-400 transition-all flex items-center gap-2 group">
             <div className="w-1 h-1 bg-cyan-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
             Acervo
           </button>
         </nav>
 
         <div className="flex items-center gap-2 md:gap-3">
-          {/* Botão Scanner IA no Topo */}
+          {/* Comandos JSON */}
+          <div className="hidden sm:flex items-center bg-slate-900 border border-slate-800 rounded-full p-0.5 overflow-hidden">
+            <button 
+              onClick={onExportJson}
+              className="px-3 py-1.5 text-[9px] font-black uppercase tracking-tighter text-cyan-500 hover:bg-cyan-500/10 transition-colors border-r border-slate-800"
+              title="Exportar Acervo para JSON"
+            >
+              EXP JSON
+            </button>
+            <button 
+              onClick={onImportJson}
+              className="px-3 py-1.5 text-[9px] font-black uppercase tracking-tighter text-emerald-500 hover:bg-emerald-500/10 transition-colors"
+              title="Importar de JSON"
+            >
+              IMP JSON
+            </button>
+          </div>
+
           <button 
             onClick={onScanClick}
             className="flex items-center gap-2 bg-slate-900 border border-cyan-500/20 hover:border-cyan-400 text-cyan-400 px-3 py-1.5 md:px-4 md:py-2 rounded-full text-[10px] font-black transition-all uppercase tracking-widest hover:bg-cyan-950/30 group"
@@ -66,7 +76,6 @@ const Layout: React.FC<LayoutProps> = ({ children, onNewClick, onScanClick }) =>
             <span className="hidden md:inline">Scanner IA</span>
           </button>
 
-          {/* Botão Novo Registro Global */}
           <button 
             onClick={onNewClick}
             className="flex items-center gap-2 bg-cyan-500 border border-cyan-400 text-slate-950 px-3 py-1.5 md:px-4 md:py-2 rounded-full text-[10px] font-black transition-all uppercase tracking-widest neon-glow shadow-[0_0_10px_rgba(34,211,238,0.3)] hover:scale-105 active:scale-95"
@@ -74,15 +83,10 @@ const Layout: React.FC<LayoutProps> = ({ children, onNewClick, onScanClick }) =>
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 4v16m8-8H4" /></svg>
             <span className="hidden sm:inline">Novo Registro</span>
           </button>
-
-          <button className="hidden sm:flex items-center gap-2 bg-slate-900 border border-slate-800 hover:border-slate-600 text-slate-400 hover:text-white px-3 py-1.5 md:px-4 md:py-2 rounded-full text-[10px] font-bold transition-all uppercase tracking-widest">
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
-            <span className="hidden md:inline">Exportar</span>
-          </button>
           
           <button className="bg-cyan-600/20 text-cyan-400 border border-cyan-500/30 hover:bg-cyan-600 hover:text-white p-2 md:px-4 md:py-2 rounded-full transition-all flex items-center gap-2 shadow-[0_0_15px_rgba(34,211,238,0.1)]">
             <svg className="w-4 h-4 animate-spin-slow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-            <span className="hidden xl:inline text-[10px] font-black uppercase tracking-widest">Sincronizar</span>
+            <span className="hidden xl:inline text-[10px] font-black uppercase tracking-widest">Sync</span>
           </button>
         </div>
       </header>

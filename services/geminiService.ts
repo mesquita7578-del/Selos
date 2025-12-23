@@ -2,7 +2,8 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { PhilatelyItem, Continent, ItemType, ItemCondition } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || "" });
+// Always use the process.env.API_KEY directly as per guidelines
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export const getSmartDescription = async (item: Partial<PhilatelyItem>): Promise<string> => {
   try {
