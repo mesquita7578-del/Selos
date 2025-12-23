@@ -17,12 +17,19 @@ const App: React.FC = () => {
   const [selectedContinent, setSelectedContinent] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<SortMode>('createdAt_desc');
   const [aiInsight, setAiInsight] = useState<string | null>(null);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   
   const [visibleCount, setVisibleCount] = useState(10);
   const loaderRef = useRef<HTMLDivElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
+    // Detectar prompt de instalação PWA
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    });
+
     const saved = localStorage.getItem('phila_collection');
     if (saved) {
       try {
@@ -31,7 +38,6 @@ const App: React.FC = () => {
         console.error("Erro ao carregar do localStorage", e);
       }
     } else {
-      // Itens iniciais apenas se estiver vazio
       const initialItems: PhilatelyItem[] = [
         {
           id: '1',
@@ -86,7 +92,6 @@ const App: React.FC = () => {
     setIsFormOpen(true);
   }, []);
 
-  // Fix: Added missing handleCloseForm to close the item form modal
   const handleCloseForm = useCallback(() => {
     setIsFormOpen(false);
     setEditingItem(null);
@@ -106,6 +111,20 @@ const App: React.FC = () => {
     fileInputRef.current?.click();
   }, []);
 
+  const handleInstallApp = useCallback(() => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then((choiceResult: any) => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('User accepted the A2HS prompt');
+        }
+        setDeferredPrompt(null);
+      });
+    } else {
+      alert("Para descarregar no PC:\n\n1. Use o Chrome ou Edge\n2. Clique no ícone de 'Instalar' na barra de endereços (ao lado da estrela de favoritos)\n3. Ou vá em Menu (...) > Instalar PhilaArchive Neon");
+    }
+  }, [deferredPrompt]);
+
   const onFileImport = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -117,14 +136,14 @@ const App: React.FC = () => {
           setItems(json);
           alert(`Sucesso! ${json.length} itens importados.`);
         } else {
-          alert("Formato de arquivo JSON inválido. Deve ser uma lista de itens.");
+          alert("Formato de arquivo JSON inválido.");
         }
       } catch (err) {
         alert("Erro ao ler o arquivo JSON.");
       }
     };
     reader.readAsText(file);
-    e.target.value = ""; // Limpa o input
+    e.target.value = "";
   };
 
   const handleSaveItem = (item: PhilatelyItem) => {
@@ -179,6 +198,8 @@ const App: React.FC = () => {
       onScanClick={handleOpenScanForm} 
       onExportJson={handleExportJson}
       onImportJson={handleImportJson}
+      onInstallApp={handleInstallApp}
+      showInstallBtn={!!deferredPrompt}
     >
       <input 
         type="file" 
@@ -191,7 +212,7 @@ const App: React.FC = () => {
       <div className="space-y-12 animate-in fade-in duration-700">
         <section id="dashboard" className="scroll-mt-24">
           <h2 className="text-3xl font-bold text-white mb-2">Olá, Colecionador</h2>
-          <p className="text-slate-400">Gerencie seu acervo de 5 continentes com comandos JSON e IA.</p>
+          <p className="text-slate-400">Gerencie seu acervo de 5 continentes com comandos JSON, IA e APP Desktop.</p>
         </section>
 
         {aiInsight && (

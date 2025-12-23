@@ -7,9 +7,19 @@ interface LayoutProps {
   onScanClick?: () => void;
   onExportJson?: () => void;
   onImportJson?: () => void;
+  onInstallApp?: () => void;
+  showInstallBtn?: boolean;
 }
 
-const Layout: React.FC<LayoutProps> = ({ children, onNewClick, onScanClick, onExportJson, onImportJson }) => {
+const Layout: React.FC<LayoutProps> = ({ 
+  children, 
+  onNewClick, 
+  onScanClick, 
+  onExportJson, 
+  onImportJson,
+  onInstallApp,
+  showInstallBtn = false
+}) => {
   const scrollTo = (id: string) => {
     const el = document.getElementById(id);
     if (el) {
@@ -48,7 +58,7 @@ const Layout: React.FC<LayoutProps> = ({ children, onNewClick, onScanClick, onEx
         </nav>
 
         <div className="flex items-center gap-2 md:gap-3">
-          {/* Comandos JSON */}
+          {/* Comandos JSON e Instalação */}
           <div className="hidden sm:flex items-center bg-slate-900 border border-slate-800 rounded-full p-0.5 overflow-hidden">
             <button 
               onClick={onExportJson}
@@ -59,10 +69,18 @@ const Layout: React.FC<LayoutProps> = ({ children, onNewClick, onScanClick, onEx
             </button>
             <button 
               onClick={onImportJson}
-              className="px-3 py-1.5 text-[9px] font-black uppercase tracking-tighter text-emerald-500 hover:bg-emerald-500/10 transition-colors"
+              className="px-3 py-1.5 text-[9px] font-black uppercase tracking-tighter text-emerald-500 hover:bg-emerald-500/10 transition-colors border-r border-slate-800"
               title="Importar de JSON"
             >
               IMP JSON
+            </button>
+            <button 
+              onClick={onInstallApp}
+              className={`px-3 py-1.5 text-[9px] font-black uppercase tracking-tighter transition-all flex items-center gap-1 ${showInstallBtn ? 'text-white bg-cyan-600 hover:bg-cyan-500' : 'text-slate-600 cursor-not-allowed hover:bg-slate-800'}`}
+              title="Descarregar APP para o PC (PWA)"
+            >
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+              INSTALAR
             </button>
           </div>
 
