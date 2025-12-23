@@ -186,20 +186,38 @@ const App: React.FC = () => {
         <div id="stats" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 scroll-mt-24">
           <CollectionStats items={items} />
           
-          <button 
-            onClick={() => { setEditingItem(null); setIsFormOpen(true); }}
-            className="group relative bg-cyan-600/5 border-2 border-dashed border-cyan-500/30 rounded-2xl p-6 flex flex-col items-center justify-center gap-4 transition-all hover:bg-cyan-600/15 hover:border-cyan-400 hover:shadow-[0_0_35px_rgba(34,211,238,0.15)]"
-          >
-            <div className="w-14 h-14 bg-cyan-500 rounded-2xl flex items-center justify-center text-slate-950 neon-glow transition-all group-hover:scale-110 group-hover:rotate-6 shadow-xl">
-              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 4v16m8-8H4" />
-              </svg>
-            </div>
-            <div className="text-center">
-              <span className="block text-white font-black text-lg uppercase tracking-tight">Novo Registro</span>
-              <span className="block text-cyan-400/60 text-[10px] uppercase tracking-widest font-black mt-1">Acervo Profissional</span>
-            </div>
-          </button>
+          <div className="flex flex-col gap-4">
+            <button 
+              onClick={() => { setEditingItem(null); setIsFormOpen(true); }}
+              className="flex-1 group relative bg-cyan-600/5 border-2 border-dashed border-cyan-500/30 rounded-2xl p-6 flex flex-col items-center justify-center gap-4 transition-all hover:bg-cyan-600/15 hover:border-cyan-400 hover:shadow-[0_0_35px_rgba(34,211,238,0.15)]"
+            >
+              <div className="w-14 h-14 bg-cyan-500 rounded-2xl flex items-center justify-center text-slate-950 neon-glow transition-all group-hover:scale-110 group-hover:rotate-6 shadow-xl">
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 4v16m8-8H4" />
+                </svg>
+              </div>
+              <div className="text-center">
+                <span className="block text-white font-black text-lg uppercase tracking-tight">Novo Registro</span>
+                <span className="block text-cyan-400/60 text-[10px] uppercase tracking-widest font-black mt-1">Manual ou Foto</span>
+              </div>
+            </button>
+
+            <button 
+              onClick={() => { setEditingItem(null); setIsFormOpen(true); }}
+              className="group bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 flex items-center justify-between hover:border-cyan-500/50 transition-all"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-cyan-500/10 rounded-lg flex items-center justify-center text-cyan-500 border border-cyan-500/20">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M11.3 1.046A1 1 0 0111 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" /></svg>
+                </div>
+                <div className="text-left">
+                  <span className="block text-xs font-black text-white uppercase tracking-widest">Scanner de IA</span>
+                  <span className="block text-[8px] text-slate-500 uppercase font-black">Importação Inteligente</span>
+                </div>
+              </div>
+              <svg className="w-4 h-4 text-slate-600 group-hover:text-cyan-500 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" /></svg>
+            </button>
+          </div>
         </div>
 
         <section id="collection" className="space-y-8 scroll-mt-24">

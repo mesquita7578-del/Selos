@@ -63,6 +63,25 @@ const ItemForm: React.FC<ItemFormProps> = ({ onSave, onCancel, initialData }) =>
     setLoadingAI(false);
   };
 
+  const runImageExtraction = async (base64: string) => {
+    setAnalyzingImage(true);
+    const metadata = await analyzeImageForMetadata(base64);
+    if (metadata) {
+      setFormData(prev => ({
+        ...prev,
+        country: metadata.country || prev.country,
+        continent: (metadata.continent as Continent) || prev.continent,
+        date: metadata.date || prev.date,
+        value: metadata.value || prev.value,
+        theme: metadata.theme || prev.theme,
+        type: (metadata.type as ItemType) || prev.type,
+        condition: (metadata.condition as ItemCondition) || prev.condition,
+        notes: metadata.notes ? (prev.notes ? prev.notes + "\n\n" : "") + metadata.notes : prev.notes,
+      }));
+    }
+    setAnalyzingImage(false);
+  };
+
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, side: 'front' | 'back') => {
     const file = e.target.files?.[0];
     if (file) {
@@ -74,24 +93,9 @@ const ItemForm: React.FC<ItemFormProps> = ({ onSave, onCancel, initialData }) =>
           [side === 'front' ? 'imageFront' : 'imageBack']: base64String
         }));
 
-        // Trigger AI analysis if it's the front image and not editing existing item
+        // Auto trigger for new items on front image upload
         if (side === 'front' && !initialData) {
-          setAnalyzingImage(true);
-          const metadata = await analyzeImageForMetadata(base64String);
-          if (metadata) {
-            setFormData(prev => ({
-              ...prev,
-              country: metadata.country || prev.country,
-              continent: (metadata.continent as Continent) || prev.continent,
-              date: metadata.date || prev.date,
-              value: metadata.value || prev.value,
-              theme: metadata.theme || prev.theme,
-              type: (metadata.type as ItemType) || prev.type,
-              condition: (metadata.condition as ItemCondition) || prev.condition,
-              notes: metadata.notes ? (prev.notes ? prev.notes + "\n\n" : "") + metadata.notes : prev.notes,
-            }));
-          }
-          setAnalyzingImage(false);
+          runImageExtraction(base64String);
         }
       };
       reader.readAsDataURL(file);
@@ -130,6 +134,86 @@ const ItemForm: React.FC<ItemFormProps> = ({ onSave, onCancel, initialData }) =>
         </div>
         
         <form onSubmit={handleSubmit} className="p-6 overflow-y-auto space-y-4">
+          <div className="p-4 bg-slate-950/50 rounded-xl border border-slate-800/50 space-y-4">
+            <div className="flex justify-between items-center">
+              <span className="text-[10px] font-black text-cyan-500 uppercase tracking-widest">Imagens do Acervo</span>
+              {formData.imageFront && (
+                <button 
+                  type="button"
+                  onClick={() => runImageExtraction(formData.imageFront!)}
+                  disabled={analyzingImage}
+                  className="flex items-center gap-2 text-[10px] font-black bg-cyan-500 text-slate-950 px-3 py-1.5 rounded-full hover:bg-cyan-400 transition-all neon-glow disabled:opacity-50"
+                >
+                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M11.3 1.046A1 1 0 0111 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" /></svg>
+                  EXTRAIR DADOS COM IA
+                </button>
+              )}
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div 
+                onClick={() => fileInputFront.current?.click()}
+                className={`group relative cursor-pointer border-2 border-dashed rounded-xl p-4 flex flex-col items-center justify-center transition-all min-h-[140px] ${
+                  formData.imageFront ? 'border-cyan-500/50 bg-cyan-950/10' : 'border-slate-800 hover:border-slate-600 bg-slate-950/50'
+                }`}
+              >
+                <input 
+                  type="file" 
+                  ref={fileInputFront} 
+                  className="hidden" 
+                  accept="image/*" 
+                  onChange={(e) => handleFileChange(e, 'front')} 
+                />
+                <span className="text-[10px] font-bold text-slate-500 uppercase mb-3">Imagem Frente</span>
+                {formData.imageFront ? (
+                  <div className="relative w-24 h-24 rounded-lg overflow-hidden border border-cyan-500/30">
+                    <img src={formData.imageFront} alt="Preview Front" className={`w-full h-full object-cover ${analyzingImage ? 'brightness-50' : ''}`} />
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <span className="text-[10px] text-white">Alterar</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="w-12 h-12 bg-slate-900 rounded-full flex items-center justify-center text-slate-600 border border-slate-800">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg>
+                  </div>
+                )}
+                {analyzingImage && (
+                  <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-xl">
+                    <div className="w-full h-0.5 bg-cyan-400 absolute animate-scan-laser shadow-[0_0_10px_#22d3ee]"></div>
+                  </div>
+                )}
+              </div>
+
+              <div 
+                onClick={() => fileInputBack.current?.click()}
+                className={`group relative cursor-pointer border-2 border-dashed rounded-xl p-4 flex flex-col items-center justify-center transition-all min-h-[140px] ${
+                  formData.imageBack ? 'border-cyan-500/50 bg-cyan-950/10' : 'border-slate-800 hover:border-slate-600 bg-slate-950/50'
+                }`}
+              >
+                <input 
+                  type="file" 
+                  ref={fileInputBack} 
+                  className="hidden" 
+                  accept="image/*" 
+                  onChange={(e) => handleFileChange(e, 'back')} 
+                />
+                <span className="text-[10px] font-bold text-slate-500 uppercase mb-3">Imagem Verso</span>
+                {formData.imageBack ? (
+                  <div className="relative w-24 h-24 rounded-lg overflow-hidden border border-cyan-500/30">
+                    <img src={formData.imageBack} alt="Preview Back" className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <span className="text-[10px] text-white">Alterar</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="w-12 h-12 bg-slate-900 rounded-full flex items-center justify-center text-slate-600 border border-slate-800">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">Tipo</label>
@@ -280,64 +364,6 @@ const ItemForm: React.FC<ItemFormProps> = ({ onSave, onCancel, initialData }) =>
               )}
             </div>
           )}
-
-          <div className="grid grid-cols-2 gap-4">
-            <div 
-              onClick={() => fileInputFront.current?.click()}
-              className={`cursor-pointer border-2 border-dashed rounded-xl p-4 flex flex-col items-center justify-center transition-all min-h-[140px] ${
-                formData.imageFront ? 'border-cyan-500/50 bg-cyan-950/10' : 'border-slate-800 hover:border-slate-600 bg-slate-950/50'
-              }`}
-            >
-              <input 
-                type="file" 
-                ref={fileInputFront} 
-                className="hidden" 
-                accept="image/*" 
-                onChange={(e) => handleFileChange(e, 'front')} 
-              />
-              <span className="text-[10px] font-bold text-slate-500 uppercase mb-3">Imagem Frente</span>
-              {formData.imageFront ? (
-                <div className="relative w-24 h-24 rounded-lg overflow-hidden border border-cyan-500/30">
-                  <img src={formData.imageFront} alt="Preview Front" className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                    <span className="text-[10px] text-white">Alterar</span>
-                  </div>
-                </div>
-              ) : (
-                <div className="w-12 h-12 bg-slate-900 rounded-full flex items-center justify-center text-slate-600 border border-slate-800">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg>
-                </div>
-              )}
-            </div>
-
-            <div 
-              onClick={() => fileInputBack.current?.click()}
-              className={`cursor-pointer border-2 border-dashed rounded-xl p-4 flex flex-col items-center justify-center transition-all min-h-[140px] ${
-                formData.imageBack ? 'border-cyan-500/50 bg-cyan-950/10' : 'border-slate-800 hover:border-slate-600 bg-slate-950/50'
-              }`}
-            >
-              <input 
-                type="file" 
-                ref={fileInputBack} 
-                className="hidden" 
-                accept="image/*" 
-                onChange={(e) => handleFileChange(e, 'back')} 
-              />
-              <span className="text-[10px] font-bold text-slate-500 uppercase mb-3">Imagem Verso</span>
-              {formData.imageBack ? (
-                <div className="relative w-24 h-24 rounded-lg overflow-hidden border border-cyan-500/30">
-                  <img src={formData.imageBack} alt="Preview Back" className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                    <span className="text-[10px] text-white">Alterar</span>
-                  </div>
-                </div>
-              ) : (
-                <div className="w-12 h-12 bg-slate-900 rounded-full flex items-center justify-center text-slate-600 border border-slate-800">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg>
-                </div>
-              )}
-            </div>
-          </div>
         </form>
 
         <div className="p-6 border-t border-slate-800 bg-slate-950/30 flex gap-3">
@@ -356,6 +382,15 @@ const ItemForm: React.FC<ItemFormProps> = ({ onSave, onCancel, initialData }) =>
           </button>
         </div>
       </div>
+      <style>{`
+        @keyframes scan-laser {
+          0% { top: 0; }
+          100% { top: 100%; }
+        }
+        .animate-scan-laser {
+          animation: scan-laser 2s linear infinite;
+        }
+      `}</style>
     </div>
   );
 };
