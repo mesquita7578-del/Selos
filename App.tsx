@@ -83,7 +83,7 @@ const App: React.FC = () => {
     
     if (Notification.permission === 'granted') {
       new Notification('PhilaArchive Neon', {
-        body: `Item de ${item.country} guardado com sucesso!`,
+        body: `Arquivo de ${item.country} atualizado!`,
         icon: 'https://cdn-icons-png.flaticon.com/512/2095/2095192.png'
       });
     }
@@ -112,41 +112,50 @@ const App: React.FC = () => {
       selectedContinent={selectedContinent}
       onContinentSelect={setSelectedContinent}
     >
-      <div className="space-y-12 pb-24">
-        <section id="dashboard" className="flex flex-col lg:flex-row gap-8 items-start scroll-mt-32">
-           <div className="flex-1 space-y-4">
-              <h2 className="text-4xl font-black text-white uppercase tracking-tighter">Exploração <span className="text-cyan-500">Live</span></h2>
-              <p className="text-slate-500 max-w-md">Gestão de alta performance para coleções de elite. Digitalize e analise raridades instantaneamente.</p>
-              {aiInsight && <div className="bg-cyan-500/10 border border-cyan-500/20 p-4 rounded-2xl flex items-center gap-4 animate-in fade-in slide-in-from-left-4"><div className="text-xl">✨</div><p className="text-xs text-cyan-100 italic">{aiInsight}</p></div>}
+      <div className="space-y-16 pb-32">
+        {/* Painel de Boas Vindas e Mapa */}
+        <section id="dashboard" className="flex flex-col xl:flex-row gap-12 items-start scroll-mt-48">
+           <div className="flex-1 space-y-6">
+              <div className="inline-flex items-center px-3 py-1 bg-cyan-500/10 border border-cyan-500/20 rounded-full">
+                 <div className="w-2 h-2 rounded-full bg-cyan-500 mr-2 animate-pulse"></div>
+                 <span className="text-[10px] font-black text-cyan-400 uppercase tracking-widest">Curadoria de Elite Ativa</span>
+              </div>
+              <h2 className="text-5xl font-black text-white uppercase tracking-tighter leading-none">Exploração <span className="text-cyan-500">Live</span></h2>
+              <p className="text-slate-500 text-lg max-w-xl leading-relaxed">Gerencie o seu acervo pessoal de até 10.000 imagens com suporte de inteligência artificial para identificação e cotação de mercado.</p>
+              {aiInsight && <div className="bg-slate-900/60 backdrop-blur border border-slate-800 p-5 rounded-3xl flex items-center gap-5 shadow-xl animate-in fade-in slide-in-from-left-6"><div className="text-2xl">✨</div><p className="text-sm text-cyan-100 italic leading-relaxed">{aiInsight}</p></div>}
            </div>
-           <div className="w-full lg:w-80">
+           <div className="w-full xl:w-[450px]">
               <WorldMap data={continentStats} selectedContinent={selectedContinent} onSelect={setSelectedContinent} />
            </div>
         </section>
 
-        <section id="collection" className="space-y-8 scroll-mt-32">
-           <div className="flex flex-col lg:flex-row gap-4 items-center bg-slate-900/40 p-4 rounded-3xl border border-slate-800/50">
+        {/* Galeria de Coleção */}
+        <section id="collection" className="space-y-10 scroll-mt-48">
+           <div className="flex flex-col lg:flex-row gap-6 items-center bg-slate-900/40 p-5 rounded-[2rem] border border-slate-800/60 shadow-2xl">
               <div className="relative flex-1 w-full">
-                <input type="text" placeholder="Procurar no arquivo por país ou tema..." className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-12 py-3 outline-none focus:border-cyan-500 transition-all text-sm" value={filter} onChange={e => setFilter(e.target.value)} />
-                <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                <input type="text" placeholder="Pesquisar por país, tema ou detalhe..." className="w-full bg-slate-950/80 border border-slate-800 rounded-2xl px-14 py-4 outline-none focus:border-cyan-500 transition-all text-sm shadow-inner" value={filter} onChange={e => setFilter(e.target.value)} />
+                <svg className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
               </div>
               <div className="flex items-center gap-4 w-full lg:w-auto">
-                <span className="hidden xl:inline text-[9px] font-black text-slate-600 uppercase tracking-widest">Ordenar</span>
-                <select value={sortBy} onChange={e => setSortBy(e.target.value as any)} className="flex-1 lg:w-48 bg-slate-950 border border-slate-800 rounded-2xl px-4 py-3 outline-none text-[10px] font-black uppercase tracking-widest text-slate-400 cursor-pointer">
-                   <option value="createdAt_desc">Mais Recentes</option>
-                   <option value="country_asc">País: A-Z</option>
-                   <option value="value_desc">Valor: Decrescente</option>
+                <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest ml-2">Ordenar</span>
+                <select value={sortBy} onChange={e => setSortBy(e.target.value as any)} className="flex-1 lg:w-64 bg-slate-950/80 border border-slate-800 rounded-2xl px-6 py-4 outline-none text-[10px] font-black uppercase tracking-widest text-slate-400 cursor-pointer hover:border-slate-600 transition-colors">
+                   <option value="createdAt_desc">Data: Mais Recentes</option>
+                   <option value="country_asc">Alfabética: País A-Z</option>
+                   <option value="value_desc">Mercado: Valor Decrescente</option>
                 </select>
               </div>
            </div>
 
-           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-6">
-              {/* Botão de Novo Registro Rápido */}
-              <button onClick={() => setIsFormOpen(true)} className="aspect-square bg-cyan-500/5 border-2 border-dashed border-cyan-500/20 rounded-xl flex flex-col items-center justify-center gap-3 hover:bg-cyan-500/10 hover:border-cyan-500/40 transition-all group">
-                <div className="w-10 h-10 bg-cyan-500/20 rounded-full flex items-center justify-center text-cyan-500 group-hover:scale-110 transition-transform">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 4v16m8-8H4" /></svg>
+           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-8">
+              {/* Gatilho de Adição Rápida */}
+              <button onClick={() => setIsFormOpen(true)} className="aspect-square bg-slate-900/30 border-2 border-dashed border-slate-800 rounded-3xl flex flex-col items-center justify-center gap-4 hover:bg-cyan-500/5 hover:border-cyan-500/30 transition-all group overflow-hidden">
+                <div className="w-14 h-14 bg-slate-950 rounded-2xl flex items-center justify-center text-cyan-500 shadow-lg group-hover:scale-110 group-hover:neon-glow transition-all">
+                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 4v16m8-8H4" /></svg>
                 </div>
-                <span className="text-[9px] font-black uppercase tracking-widest text-cyan-500/80">Novo Registro</span>
+                <div className="text-center">
+                  <span className="block text-[10px] font-black uppercase tracking-widest text-slate-500 group-hover:text-cyan-400">Novo Arquivo</span>
+                  <span className="text-[8px] text-slate-700 uppercase font-bold tracking-tighter">Frente + Verso</span>
+                </div>
               </button>
 
               {sortedAndFilteredItems.slice(0, visibleCount).map(item => (
@@ -154,11 +163,18 @@ const App: React.FC = () => {
               ))}
            </div>
 
-           {visibleCount < sortedAndFilteredItems.length && <div ref={loaderRef} className="py-12 flex justify-center"><button onClick={() => setVisibleCount(v => v + 12)} className="px-8 py-3 bg-slate-900 border border-slate-800 rounded-full text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-white transition-all">Ver Mais Itens</button></div>}
+           {visibleCount < sortedAndFilteredItems.length && (
+             <div ref={loaderRef} className="py-20 flex justify-center">
+               <button onClick={() => setVisibleCount(v => v + 12)} className="px-12 py-4 bg-slate-900 border border-slate-800 rounded-full text-[11px] font-black uppercase tracking-[0.3em] text-slate-400 hover:text-cyan-400 hover:border-cyan-500/30 transition-all shadow-xl">Carregar Mais Peças</button>
+             </div>
+           )}
            
            {sortedAndFilteredItems.length === 0 && (
-             <div className="text-center py-24 bg-slate-900/10 rounded-3xl border border-dashed border-slate-800/50">
-               <p className="text-slate-600 font-black uppercase tracking-widest text-xs">Nenhum item filtrado nesta região.</p>
+             <div className="text-center py-32 bg-slate-900/10 rounded-[3rem] border border-dashed border-slate-800/40">
+               <div className="w-20 h-20 bg-slate-900 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-800">
+                  <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+               </div>
+               <p className="text-slate-600 font-black uppercase tracking-widest text-sm">Nenhum item filtrado nesta região do globo.</p>
              </div>
            )}
         </section>
@@ -166,23 +182,27 @@ const App: React.FC = () => {
 
       <VoiceAssistant collectionSummary={items.slice(0, 50).map(i => `${i.country} ${i.type}`).join(', ')} />
       
+      {/* Modal Analítico (STATS) */}
       {showStatsModal && (
-        <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-slate-950/98 backdrop-blur-xl animate-in fade-in zoom-in-95">
-          <div className="w-full max-w-5xl h-[85vh] bg-slate-900 rounded-3xl border border-slate-800 flex flex-col overflow-hidden shadow-2xl">
-            <div className="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-950/50">
-              <div className="flex items-center gap-4">
-                 <div className="w-10 h-10 bg-cyan-500/20 rounded-xl flex items-center justify-center text-cyan-400">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" /></svg>
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-950/98 backdrop-blur-2xl animate-in fade-in zoom-in-95">
+          <div className="w-full max-w-6xl h-[85vh] bg-slate-900 rounded-[2.5rem] border border-slate-800 flex flex-col overflow-hidden shadow-2xl">
+            <div className="p-8 border-b border-slate-800 flex justify-between items-center bg-slate-950/40">
+              <div className="flex items-center gap-5">
+                 <div className="w-12 h-12 bg-cyan-500/10 rounded-2xl flex items-center justify-center text-cyan-400 border border-cyan-500/20">
+                    <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" /></svg>
                  </div>
-                 <h2 className="text-xl font-black neon-text uppercase tracking-widest">Painel Analítico</h2>
+                 <div>
+                    <h2 className="text-2xl font-black neon-text uppercase tracking-widest leading-none">Análise do Portfólio</h2>
+                    <p className="text-[10px] text-slate-500 uppercase tracking-[0.4em] font-bold mt-1">Visão Geral Detalhada do Acervo</p>
+                 </div>
               </div>
-              <button onClick={() => setShowStatsModal(false)} className="w-10 h-10 flex items-center justify-center text-slate-500 hover:text-white hover:bg-slate-800 rounded-full transition-all text-2xl">&times;</button>
+              <button onClick={() => setShowStatsModal(false)} className="w-12 h-12 flex items-center justify-center text-slate-500 hover:text-white hover:bg-slate-800 rounded-full transition-all text-3xl">&times;</button>
             </div>
-            <div className="flex-1 p-8 overflow-y-auto grid grid-cols-1 lg:grid-cols-2 gap-8 scrollbar-hide">
+            <div className="flex-1 p-10 overflow-y-auto grid grid-cols-1 lg:grid-cols-2 gap-10 scrollbar-hide">
               <CollectionStats items={items} />
             </div>
-            <div className="p-4 border-t border-slate-800 bg-slate-950/50 text-center">
-               <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Arquivamento Digital V.2.5 - Total: {items.length} Registos</p>
+            <div className="p-5 border-t border-slate-800 bg-slate-950/50 text-center">
+               <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest italic">Processamento Analítico PhilaArchive V.3.1 - Total: {items.length} Registos</span>
             </div>
           </div>
         </div>
